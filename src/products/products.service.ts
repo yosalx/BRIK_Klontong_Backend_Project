@@ -5,6 +5,7 @@ import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import * as fs from 'fs';
 
 @Injectable()
 export class ProductsService {
@@ -50,10 +51,21 @@ export class ProductsService {
     id: number,
     updateProductDto: UpdateProductDto,
   ): Promise<Product> {
-    const oldProduct = await this.findOne(id);
+    const product = await this.findOne(id);
 
-    if (!oldProduct) {
+    if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    const oldProduct = { ...product };
+
+    // If imageUrl is being updated directly
+    if (updateProductDto.image && updateProductDto.image !== product.image) {
+      if (product.image) {
+        fs.unlink(product.image, (err) => {
+          if (err) console.error('Error deleting old image:', err);
+        });
+      }
     }
 
     const updatedProduct = this.productRepository.merge(
@@ -77,10 +89,22 @@ export class ProductsService {
   async remove(id: number): Promise<void> {
     const product = await this.findOne(id);
 
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    if (product.image) {
+      fs.unlink(product.image, (err) => {
+        if (err) console.error('Error deleting image:', err);
+      });
+    }
+
     const result = await this.productRepository.delete(id);
+
     if (result.affected === 0) {
       throw new NotFoundException(`Product with ID ${id} not found`);
     }
+
     await this.auditLogService.createAuditLog(
       'Product',
       id,
@@ -88,5 +112,32 @@ export class ProductsService {
       product,
       {},
     );
+  }
+
+  async updateImage(id: number, image: string): Promise<Product> {
+    const product = await this.findOne(id);
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    if (product.image) {
+      fs.unlink(product.image, (err) => {
+        if (err) console.error('Error deleting old image:', err);
+      });
+    }
+
+    product.image = image;
+    const updatedProduct = await this.productRepository.save(product);
+
+    await this.auditLogService.createAuditLog(
+      'Product',
+      id,
+      'UPDATE_IMAGE',
+      { image: product.image },
+      { image: updatedProduct.image },
+    );
+
+    return updatedProduct;
   }
 }

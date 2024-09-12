@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsString, IsUrl } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  IsUrl,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateProductDto {
   @IsNotEmpty()
@@ -37,7 +43,7 @@ export class CreateProductDto {
   @IsNumber()
   height: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsUrl()
   image: string;
 

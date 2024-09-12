@@ -32,7 +32,7 @@ export class Product {
   @Column()
   height: number;
 
-  @Column()
+  @Column({ nullable: true })
   image: string;
 
   @Column()

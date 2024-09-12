@@ -13,10 +13,13 @@ import {
   BadRequestException,
   InternalServerErrorException,
   Logger,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { CustomFileInterceptor } from '../common/interceptors/file-upload.interceptor';
 
 @Controller('products')
 export class ProductsController {
@@ -42,6 +45,36 @@ export class ProductsController {
       }
       throw new InternalServerErrorException(
         'An unexpected error occurred while creating the product',
+      );
+    }
+  }
+
+  @Post(':id/upload-image')
+  @UseInterceptors(CustomFileInterceptor('image'))
+  @HttpCode(HttpStatus.OK)
+  async uploadImage(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    try {
+      if (!file) {
+        throw new BadRequestException('No image file uploaded');
+      }
+      const imageUrl = file.path;
+      return await this.productsService.updateImage(+id, imageUrl);
+    } catch (error) {
+      this.logger.error(
+        `Failed to upload image for product ${id}: ${error.message}`,
+        error.stack,
+      );
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'An unexpected error occurred while uploading the image',
       );
     }
   }
