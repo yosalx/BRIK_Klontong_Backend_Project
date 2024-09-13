@@ -28,9 +28,19 @@ export class ProductsService {
     const query = this.productRepository.createQueryBuilder('product');
 
     if (search) {
+      const searchTerms = search.split(' ').map((term) => `%${term}%`);
+
       query.where(
-        'product.name LIKE :search OR product.description LIKE :search',
-        { search: `%${search}%` },
+        searchTerms
+          .map(
+            (_, index) =>
+              `(product.name ILIKE :search${index} OR product.description ILIKE :search${index})`,
+          )
+          .join(' AND '),
+        searchTerms.reduce((params, term, index) => {
+          params[`search${index}`] = term;
+          return params;
+        }, {}),
       );
     }
 
