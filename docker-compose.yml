@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+  klontong_app:
+    container_name: klontong_app
+    build: .
+    ports:
+      - 3000:3000
+    environment:
+      - DB_TYPE=postgres
+      - PG_HOST=db 
+      - PG_USER=postgres
+      - PG_PASSWORD=postgres
+      - PG_DB=klontong
+      - PG_PORT=5432
+      - JWT_SECRET=1fc7d7a4a66ac3090aa6acaacc3cedd66790627f00a72eea4c24286d8c3af046
+    depends_on:
+      - db
+    networks:
+      - app-network 
+  db:
+    container_name: klontong_db
+    image: postgres:14
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=klontong
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - app-network
+volumes:
+  pgdata: {}
+networks:
+  app-network:
+    driver: bridge
