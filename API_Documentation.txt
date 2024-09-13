@@ -1,0 +1,110 @@
+PRODUCT
+
+1. Create Product
+  Method: POST
+  Endpoint: /products
+  Request Body: {
+    "CategoryId": 20,
+    "categoryName": "Test3",
+    "sku": "MHZVTK",
+    "name": "Test3",
+    "description": "Test3",
+    "weight": 500,
+    "width": 5,
+    "length": 5,
+    "height": 5,
+    "image": "https://www.google.com/dummy-image.jpg", (optional)
+    "price": 6000
+  }
+
+2. Upload Product Image
+  Method: POST
+  Endpoint: /products/{id}/upload-image
+  Request Body: Form Data (key: image, value: image file)
+
+3. Read Product
+  Method: GET
+  Endpoint: /products
+  Query Params: page, limit, search
+  Example: /products?page=1&limit=10&search=Snack
+
+4. Read Product by ID
+  Method: GET
+  Endpoint: /products/{id}
+
+5. Update Product
+  Method: PATCH
+  Endpoint: /products/{id}
+  Request Body (at least one): {
+    "CategoryId": 20,
+    "categoryName": "Test3",
+    "sku": "MHZVTK",
+    "name": "Test3",
+    "description": "Test3",
+    "weight": 500,
+    "width": 5,
+    "length": 5,
+    "height": 5,
+    "image": "https://www.google.com/dummy-image.jpg",
+    "price": 6000
+  }
+
+5. Delete Product
+  Method: DELETE
+  Endpoint: /products/{id}
+
+
+AUDIT LOGS
+
+1. Read Audit Logs
+  Method: GET
+  Endpoint: /audit-logs
+  Query Params: page, limit, entityName, action, startDate, endDate
+  Example: 
+    1. /audit-logs?page=1&limit=10&entityName=Product&action=UPDATE&startDate=2021-01-01&endDate=2021-12-31
+    2. /audit-logs?page=1&limit=10&entityName=Product&action=UPDATE_IMAGE&startDate=2021-01-01&endDate=2021-12-31
+    3. /audit-logs?page=1&limit=10&entityName=Product&action=DELETE&startDate=2021-01-01&endDate=2021-12-31
+
+// For checkout API, you need to login first to get the token
+
+USER
+
+1. Register
+  Method: POST
+  Endpoint: /auth/register
+  Request Body: {
+    "username": "testuser",
+    "password": "password123"
+  }
+
+2. Login
+  Method: POST
+  Endpoint: /auth/login
+  Request Body: {
+    "username": "testuser",
+    "password": "password123"
+  }
+
+CHECKOUT (Order)
+
+1. Create Order
+  Method: POST
+  Endpoint: /orders
+  Authorization: Bearer {token}
+  Request Body: {
+    "orderItems": [
+      {
+        "productId": 3,
+        "quantity": 1
+      },
+      {
+        "productId": 4,
+        "quantity": 1
+      }
+    ]
+  }
+
+2. Get User Orders
+  Method: GET
+  Endpoint: /orders
+  Authorization: Bearer {token}
