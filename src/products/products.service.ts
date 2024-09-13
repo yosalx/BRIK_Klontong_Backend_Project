@@ -93,7 +93,7 @@ export class ProductsService {
       'Product',
       id,
       'UPDATE',
-      oldProduct,
+      { ...product },
       savedProduct,
     );
 
